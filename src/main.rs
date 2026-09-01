@@ -210,6 +210,15 @@ To get started, view the `start` help with `bartib start --help`")
                         .help("do report activities for this project only")
                         .takes_value(true)
                         .required(false),
+                )
+                .arg(
+                    Arg::with_name("overtime")
+                        .short("o")
+                        .long("overtime")
+                        .value_name("OVERTIME")
+                        .help("display overtime for given timeperiod")
+                        .takes_value(false)
+                        .required(false)
                 ),
         )
         .subcommand(
@@ -283,6 +292,30 @@ To get started, view the `start` help with `bartib start --help`")
                         .required(false),
                 ),
         )
+        .subcommand(
+            SubCommand::with_name("use-ot")
+                .about("take \"Gleitzeit\", input value is multiples of full working days")
+                .arg(
+                    Arg::with_name("n_days")
+                        .value_name("N_DAYS")
+                        .help("Number of days of \"Gleitzeit\" taken, as float")
+                        .required(true)
+                        .takes_value(true)
+                        .default_value("0.0"),
+                )
+        )
+        .subcommand(
+            SubCommand::with_name("add-ot")
+                .about("add \"Gleitzeit\", input value is HH:MM")
+                .arg(
+                    Arg::with_name("duration")
+                        .value_name("DURATION")
+                        .help("Number of days of \"Gleitzeit\" taken, as duration")
+                        .required(true)
+                        .takes_value(true)
+                        .default_value("0.0"),
+                )
+        )
         .get_matches();
 
     let file_name = matches.value_of("file")
@@ -352,7 +385,8 @@ fn run_subcommand(matches: &ArgMatches, file_name: &str) -> Result<()> {
         ("report", Some(sub_m)) => {
             let filter = create_filter_for_arguments(sub_m);
             let processors = create_processors_for_arguments(sub_m);
-            bartib::controller::report::show_report(file_name, filter, processors)
+            let overtime = sub_m.is_present("overtime");
+            bartib::controller::report::show_report(file_name, filter, processors, overtime)
         }
         ("projects", Some(sub_m)) => bartib::controller::list::list_projects(
             file_name,
@@ -379,6 +413,12 @@ fn run_subcommand(matches: &ArgMatches, file_name: &str) -> Result<()> {
             let processors = create_processors_for_arguments(sub_m);
             let writer = create_status_writer(sub_m);
             bartib::controller::status::show_status(file_name, filter, processors, writer.borrow())
+        }
+        ("use-ot", Some(_sub_m)) => {
+            todo!()
+        }
+        ("add-ot", Some(_sub_m)) => {
+            todo!()
         }
         _ => bail!("Unknown command"),
     }

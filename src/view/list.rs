@@ -218,7 +218,7 @@ fn get_activity_table_row(activity: &activity::Activity, with_start_dates: bool)
 }
 
 // groups activities in vectors of activities that started at the same day
-fn group_activities_by_date<'a>(
+pub fn group_activities_by_date<'a>(
     activities: &[&'a activity::Activity],
 ) -> BTreeMap<NaiveDate, Vec<&'a activity::Activity>> {
     let mut activities_by_date = BTreeMap::new();

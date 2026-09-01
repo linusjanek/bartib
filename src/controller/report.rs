@@ -5,11 +5,13 @@ use crate::data::bartib_file;
 use crate::data::getter;
 use crate::data::processor;
 use crate::view::report;
+use crate::view::report::show_overtime;
 
 pub fn show_report(
     file_name: &str,
     filter: getter::ActivityFilter,
     processors: processor::ProcessorList,
+    overtime: bool,
 ) -> Result<()> {
     let file_content = bartib_file::get_file_content(file_name)?;
     let activities = getter::get_activities(&file_content).collect();
@@ -30,6 +32,10 @@ pub fn show_report(
     );
 
     report::show_activities(&filtered_activities[first_element..filtered_activities.len()]);
+
+    if overtime {
+        show_overtime(&filtered_activities[first_element..filtered_activities.len()])
+    }
 
     Ok(())
 }

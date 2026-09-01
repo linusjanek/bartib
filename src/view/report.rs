@@ -8,6 +8,7 @@ use nu_ansi_term::Style;
 use textwrap;
 
 use crate::conf;
+use crate::controller::overtime::get_total_overtime;
 use crate::data::activity;
 use crate::view::format_util;
 
@@ -56,9 +57,47 @@ impl fmt::Display for Report<'_> {
     }
 }
 
+fn longest_line_terminal(report: &Report) -> usize {
+    let mut longest_line = get_longest_line(&report.project_map).unwrap_or(0);
+    let longest_duration_string = get_longest_duration_string(report).unwrap_or(0);
+
+    let terminal_width = term_size::dimensions_stdout().map_or(conf::DEFAULT_WIDTH, |d| d.0);
+
+    if terminal_width < longest_line + longest_duration_string + 1 {
+        longest_line = terminal_width - longest_duration_string - 1;
+    }
+    longest_line
+}
+
+pub struct OvertimeWithFormatting(pub Duration, pub usize);
+
+impl fmt::Display for OvertimeWithFormatting {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        writeln!(
+            f,
+            "{prefix}{total:.<width$} {duration}{suffix}",
+            prefix = Style::new().bold().prefix(),
+            total = "Overtime",
+            width = self.1,
+            duration = format_util::format_duration(&self.0),
+            suffix = Style::new().bold().infix(Style::new())
+        )?;
+
+        Ok(())
+    }
+}
+
 pub fn show_activities<'a>(activities: &'a [&'a activity::Activity]) {
     let report = Report::new(activities);
     println!("\n{report}");
+}
+
+pub fn show_overtime(activities: &[&activity::Activity]) {
+    let overtime = get_total_overtime(activities);
+    let report = Report::new(activities);
+    let longest_line = longest_line_terminal(&report);
+    let printout = OvertimeWithFormatting(overtime, longest_line);
+    println!("\n{printout}");
 }
 
 fn create_project_map<'a>(activities: &'a [&'a activity::Activity]) -> ProjectMap<'a> {
