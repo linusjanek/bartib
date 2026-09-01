@@ -97,7 +97,7 @@ pub fn show_overtime(activities: &[&activity::Activity]) {
     let report = Report::new(activities);
     let longest_line = longest_line_terminal(&report);
     let printout = OvertimeWithFormatting(overtime, longest_line);
-    println!("\n{printout}");
+    println!("{printout}");
 }
 
 fn create_project_map<'a>(activities: &'a [&'a activity::Activity]) -> ProjectMap<'a> {
