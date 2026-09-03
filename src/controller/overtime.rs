@@ -1,4 +1,4 @@
-use chrono::Duration;
+use chrono::{Duration, Local};
 use crate::data::activity;
 use crate::view::list::group_activities_by_date;
 use crate::view::report::sum_duration;
@@ -25,6 +25,9 @@ pub fn get_total_overtime(activities: &[&activity::Activity]) -> Duration {
     // Sum up total overtime
     let mut total_overtime = Duration::seconds(0);
     for daily_activities in grouped_activities {
+        if daily_activities.0 == Local::now().naive_local().date() {
+            continue
+        }
         total_overtime += get_overtime_from_activity_vec(daily_activities.1)
     }
 
