@@ -25,7 +25,7 @@ pub fn get_total_overtime(activities: &[&activity::Activity]) -> Duration {
     // Sum up total overtime
     let mut total_overtime = Duration::seconds(0);
     for daily_activities in grouped_activities {
-        if daily_activities.0 == Local::now().naive_local().date() {
+        if daily_activities.0 == Local::now().naive_local().date() && check_for_running_activity(&daily_activities.1) {
             continue
         }
         total_overtime += get_overtime_from_activity_vec(daily_activities.1)
@@ -34,6 +34,15 @@ pub fn get_total_overtime(activities: &[&activity::Activity]) -> Duration {
     // TODO include "Übertrag"
 
     total_overtime
+}
+
+pub fn check_for_running_activity(activities: &Vec<&activity::Activity>) -> bool {
+    for activity in activities {
+        if activity.end == None {
+            return true
+        }
+    }
+    false
 }
 
 pub fn get_overtime_from_activity_vec(activities: Vec<&activity::Activity>) -> Duration {
